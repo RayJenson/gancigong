@@ -4,7 +4,7 @@
   "description": "赶词工 —— 主动触发型单词复习工具，软件来找你，不是你去找软件",
   "main": "out/main/index.js",
   "author": "赶词工",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": true,
   "scripts": {
     "dev": "electron-vite dev",

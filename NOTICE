@@ -1,0 +1,15 @@
+赶词工
+Copyright 2026 赶词工
+
+本产品包含以下第三方组件与数据，其版权归各自作者所有，分别遵循其原始许可证：
+
+- Electron — MIT — https://github.com/electron/electron
+- Vue.js — MIT — https://github.com/vuejs/core
+- Vue Router — MIT — https://github.com/vuejs/router
+- Pinia — MIT — https://github.com/vuejs/pinia
+- Naive UI — MIT — https://github.com/tusen-ai/naive-ui
+- Tailwind CSS — MIT — https://github.com/tailwindlabs/tailwindcss
+- PapaParse — MIT — https://github.com/mholt/PapaParse
+- ECDICT / cdict_query — MIT — https://github.com/skywind3000/ECDICT
+
+离线词库数据由 ECDICT 派生数据构建，遵循 MIT 许可。
