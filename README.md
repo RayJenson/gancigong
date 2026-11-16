@@ -11,7 +11,7 @@
 [![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D4?logo=windows&logoColor=white)](#已知边界)
-[![License](https://img.shields.io/badge/license-Apache--2.0-1F7A5C)](LICENSE.txt)
+[![License](https://img.shields.io/badge/license-GPL--3.0-1F7A5C)](LICENSE.txt)
 
 </div>
 
@@ -266,17 +266,17 @@ node scripts/e2e-probe.mjs "samples/四级核心20词.csv"
 
 ## 许可
 
-本项目使用 [Apache License 2.0](LICENSE.txt)。
+本项目使用 [GNU General Public License v3.0](LICENSE.txt)（GPL-3.0）。
 
-你可以自由使用、修改和分发，但需要遵守以下归属要求：
+你可以自由使用、修改和分发，但分发衍生作品时需要遵守：
 
-- 分发时附带本许可证副本
+- 衍生作品整体以 GPL-3.0 授权，不能附加额外限制
+- 向接收者提供完整、可编译的对应源码
+- 附带本许可证副本，保留原始版权声明
 - 修改过的文件要显著标注「已修改」
-- 保留源码中的版权、专利、商标与归属声明
-- 衍生作品需一并保留 [NOTICE](NOTICE) 中的归属信息
-- 不得使用「赶词工」的名称或图标暗示官方背书
+- 通过网络提供修改后的程序时，同样需要提供源码
 
-第三方资源（各自遵循原始许可证）：
+第三方资源（各自遵循原始许可证，归属信息见 [NOTICE](NOTICE)）：
 
 - [ECDICT](https://github.com/skywind3000/ECDICT) / `cdict_query`（MIT）——离线词典数据源
 - [Electron](https://github.com/electron/electron)、[Vue](https://github.com/vuejs/core)、[Naive UI](https://github.com/tusen-ai/naive-ui)、[Tailwind CSS](https://github.com/tailwindlabs/tailwindcss)、[PapaParse](https://github.com/mholt/PapaParse)（均为 MIT）

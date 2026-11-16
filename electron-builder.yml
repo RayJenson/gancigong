@@ -20,6 +20,10 @@ extraResources:
     to: resources/kiosk-lock.ps1
   - from: resources/tray.png
     to: resources/tray.png
+  - from: LICENSE.txt
+    to: LICENSE.txt
+  - from: NOTICE
+    to: NOTICE
 
 asar: true
 
