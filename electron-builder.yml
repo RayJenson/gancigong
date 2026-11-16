@@ -1,0 +1,49 @@
+appId: com.gancigong.desktop
+productName: 赶词工
+copyright: Copyright © 2026 赶词工
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - out/**/*
+  - '!**/*.map'
+
+# 词典与 Kiosk 脚本要在 asar 外，主进程按 process.resourcesPath/resources/... 读取
+extraResources:
+  - from: resources/dictionary
+    to: resources/dictionary
+    filter:
+      - '**/*.json'
+  - from: resources/kiosk-lock.ps1
+    to: resources/kiosk-lock.ps1
+  - from: resources/tray.png
+    to: resources/tray.png
+
+asar: true
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-setup.${ext}
+  requestedExecutionLevel: asInvoker
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: 赶词工
+  uninstallDisplayName: 赶词工
+  # 卸载时保留本地 SQLite 数据，重装还能接着用
+  deleteAppDataOnUninstall: false
+  installerLanguages:
+    - zh_CN
+  license: LICENSE.txt
+
+publish: null

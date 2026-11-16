@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "jsx": "preserve",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "useDefineForClassFields": true,
+    "noUnusedLocals": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@renderer/*": ["src/renderer/src/*"]
+    }
+  },
+  "include": [
+    "src/renderer/src/**/*.ts",
+    "src/renderer/src/**/*.vue",
+    "src/shared/**/*.ts",
+    "src/preload/index.d.ts"
+  ]
+}

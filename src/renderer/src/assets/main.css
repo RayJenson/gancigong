@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-brand: #1f7a5c;
+  --color-brand-press: #175f48;
+  --color-accent: #e86a2c;
+  --color-danger: #c93b3b;
+  --color-ink: #15201c;
+  --color-muted: #6b7a74;
+  --color-line: #dfe5e1;
+  --color-surface: #ffffff;
+  --color-canvas: #f4f6f4;
+  --color-canvas-dark: #121917;
+
+  --font-sans: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-term: ui-serif, Georgia, 'Times New Roman', serif;
+
+  --radius-card: 10px;
+  --radius-pop: 14px;
+
+  --shadow-review: 0 18px 48px rgb(15 32 28 / 0.18);
+  --shadow-pop: 0 20px 60px rgb(15 32 28 / 0.28);
+}
+
+@layer base {
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  /* NConfigProvider 会在 #app 下多包一层无高度的 div，不撑满的话子树的 h-full 全部失效 */
+  #app {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #app > * {
+    flex: 1;
+    min-height: 0;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  input,
+  textarea {
+    user-select: text;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #cdd6d1;
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #b6c2bc;
+    background-clip: content-box;
+  }
+}
+
+@utility card-surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+@utility num-display {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
