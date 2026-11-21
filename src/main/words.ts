@@ -25,6 +25,8 @@ function map(r: WordRowDb): WordRow {
   return {
     id: r.id,
     listId: r.list_id,
+    unitId: null,
+    unitName: '',
     term: r.term,
     phonetic: r.phonetic ?? '',
     meaning: r.meaning ?? '',
@@ -62,7 +64,7 @@ export function listLists(): ListInfo[] {
      left join word_states s on s.word_id = w.id
      group by l.id order by l.id`,
     now
-  ).map((r) => ({ id: r.id, name: r.name, remark: r.remark ?? '', wordCount: r.word_count ?? 0, dueCount: r.due_count ?? 0 }))
+  ).map((r) => ({ id: r.id, name: r.name, remark: r.remark ?? '', wordCount: r.word_count ?? 0, dueCount: r.due_count ?? 0, unitCount: 0 }))
 }
 
 export function createList(name: string, remark = ''): number {

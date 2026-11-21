@@ -6,9 +6,15 @@ export type FireReason = 'scheduled' | 'delayed' | 'out_of_words' | 'paused' | '
 
 let timer: NodeJS.Timeout | null = null
 let nextFireAt: number | null = null
+let setAt: number | null = null
 let reason: FireReason = 'idle'
 let onFire: ((at: number) => void) | null = null
 let busy: (() => boolean) | null = null
+
+function assign(next: number | null): void {
+  if (next !== nextFireAt) setAt = next === null ? null : Date.now()
+  nextFireAt = next
+}
 
 export function startScheduler(fire: (at: number) => void, isBusy: () => boolean): void {
   onFire = fire
@@ -35,13 +41,13 @@ export function recompute(notAfter?: number): void {
     return
   }
   if (!s.windows.length) {
-    nextFireAt = null
+    assign(null)
     reason = 'paused'
     return
   }
   const from = Math.max(Date.now(), notAfter ?? 0)
   const point = nextGridPoint(from + 1000, s.windows, s.intervalMinutes)
-  nextFireAt = point
+  assign(point)
   reason = point === null ? 'paused' : 'scheduled'
 }
 
@@ -50,14 +56,14 @@ export function applyDelay(): { at: number | null } {
   const s = getSettings()
   const target = Date.now() + s.delayMinutes * 60_000
   const clamped = clampIntoWindow(target, s.windows, s.intervalMinutes)
-  nextFireAt = clamped
+  assign(clamped)
   reason = clamped === null ? 'paused' : 'delayed'
   return { at: clamped }
 }
 
 /** 词库空到抽不出任何词：停掉排程，直到有词录入再恢复 */
 export function markOutOfWords(): void {
-  nextFireAt = null
+  assign(null)
   reason = 'out_of_words'
 }
 
@@ -76,8 +82,13 @@ export function syncWordAvailability(): void {
   }
 }
 
-export function scheduleStatus(): { nextFireAt: number | null; reason: FireReason; active: boolean } {
-  return { nextFireAt, reason, active: timer !== null }
+export function scheduleStatus(): {
+  nextFireAt: number | null
+  setAt: number | null
+  reason: FireReason
+  active: boolean
+} {
+  return { nextFireAt, setAt, reason, active: timer !== null }
 }
 
 function tick(): void {
@@ -94,7 +105,7 @@ function recomputeFrom(at: number): void {
   const s = getSettings()
   const point = nextGridPoint(at + 1000, s.windows, s.intervalMinutes)
   if (point && point > Date.now()) {
-    nextFireAt = point
+    assign(point)
     reason = 'scheduled'
   } else {
     recompute()

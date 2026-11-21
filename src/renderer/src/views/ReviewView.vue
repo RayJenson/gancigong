@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 import type { CardData, Rating, RoundPlan } from '@shared/types'
+import { playError, playKey } from '@renderer/lib/typing-sound'
 
 const route = useRoute()
 const roundId = Number(route.query.round ?? 0)
@@ -56,8 +57,8 @@ const verdictLine = computed(() => {
   return verdict.value === 1 ? '✓ 选对了' : '✗ 选错了，正确答案已标出'
 })
 
-function speak(text: string): void {
-  if (!plan.value?.ttsEnabled || !text || !('speechSynthesis' in window)) return
+function speak(text: string, manual = false): void {
+  if ((!manual && !plan.value?.ttsEnabled) || !text || !('speechSynthesis' in window)) return
   try {
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'en-US'
@@ -182,6 +183,7 @@ function handleLetter(key: string): void {
   if (key.toLowerCase() !== expected.toLowerCase()) {
     mistake.value = true
     wrong.value = { pos: typed.value.length, ch: key.toUpperCase() }
+    playError()
     if (wrongTimer) clearTimeout(wrongTimer)
     wrongTimer = window.setTimeout(() => {
       wrong.value = null
@@ -189,6 +191,7 @@ function handleLetter(key: string): void {
     return
   }
   typed.value.push(expected)
+  playKey()
   if (typed.value.length === letterCount.value) completeSpelling()
 }
 
@@ -228,7 +231,8 @@ function choose(i: number): void {
   revealed.value = true
   const ok = current.options[i] === current.meaning.trim()
   verdict.value = ok ? 1 : 0
-  if (ok) speak(current.term)
+  // 选完不管对错都再念一遍，让正确发音和释义绑定
+  speak(current.term)
   advanceAfter(ok ? 2800 : 4000)
 }
 
@@ -281,6 +285,7 @@ function onKey(event: KeyboardEvent): void {
     if (event.code === 'Backspace') {
       event.preventDefault()
       typed.value.pop()
+      playKey()
       return
     }
     if (event.key.length === 1 && /[a-zA-Z]/.test(event.key)) {
@@ -435,7 +440,12 @@ onBeforeUnmount(() => {
         </div>
 
         <template v-else>
-          <div class="font-term break-words font-semibold leading-tight" :class="fullscreen ? 'text-[72px] text-white' : 'text-[34px] text-ink'">
+          <div
+            class="cursor-pointer font-term break-words font-semibold leading-tight transition-opacity hover:opacity-75"
+            :class="fullscreen ? 'text-[72px] text-white' : 'text-[34px] text-ink'"
+            title="点击朗读单词"
+            @click="speak(card.term, true)"
+          >
             {{ card.term }}
           </div>
           <div v-if="card.phonetic" class="num-display mt-1 text-[16px]" :class="fullscreen ? 'text-white/50' : 'text-muted'">

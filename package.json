@@ -14,13 +14,19 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
     "dict:build": "node scripts/build-dictionary.mjs",
+    "build:installer": "node scripts/build-installer.mjs",
+    "dev:tauri": "vite --config vite.tauri.config.ts",
+    "build:tauri": "vite build --config vite.tauri.config.ts",
+    "tauri": "tauri",
     "dist": "npm run typecheck && electron-vite build && electron-builder --win nsis"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.12.5",
     "papaparse": "^5.7.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.4",
+    "@tauri-apps/cli": "^2.12.5",
     "@types/node": "^24.10.1",
     "@types/papaparse": "^5.5.0",
     "@vicons/ionicons5": "^0.13.0",

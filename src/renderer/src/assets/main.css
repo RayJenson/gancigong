@@ -1,25 +1,161 @@
 @import 'tailwindcss';
 
-@theme {
-  --color-brand: #1f7a5c;
-  --color-brand-press: #175f48;
-  --color-accent: #e86a2c;
-  --color-danger: #c93b3b;
-  --color-ink: #15201c;
-  --color-muted: #6b7a74;
-  --color-line: #dfe5e1;
-  --color-surface: #ffffff;
-  --color-canvas: #f4f6f4;
-  --color-canvas-dark: #121917;
+/*
+ * 主题令牌走 CSS 变量：Tailwind v4 用 @theme inline 生成「引用变量」的工具类，
+ * 运行时切 data-theme 就能连同 bg-brand / text-ink 这些工具类一起换肤。
+ */
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-fill: var(--brand-fill);
+  --color-on-brand: var(--on-brand);
+  --color-brand-press: var(--brand-press);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-raised: var(--raised);
+  --color-canvas: var(--canvas);
+  --color-canvas-dark: var(--canvas-dark);
 
   --font-sans: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   --font-term: ui-serif, Georgia, 'Times New Roman', serif;
 
-  --radius-card: 10px;
-  --radius-pop: 14px;
+  --radius-card: 14px;
+  --radius-pop: 16px;
 
-  --shadow-review: 0 18px 48px rgb(15 32 28 / 0.18);
-  --shadow-pop: 0 20px 60px rgb(15 32 28 / 0.28);
+  --shadow-review: 0 18px 48px rgb(9 13 11 / 0.2);
+  --shadow-pop: 0 20px 60px rgb(9 13 11 / 0.3);
+}
+
+:root {
+  --brand: #1d5b43;
+  --brand-fill: #1d5b43;
+  --brand-press: #143f2f;
+  --on-brand: #ffffff;
+  --accent: #c2792c;
+  --danger: #b23a3a;
+  --ink: #1c241f;
+  --muted: #6e7a72;
+  --line: #e4dfd3;
+  --surface: #fffdf8;
+  --surface-2: #faf5ea;
+  --raised: #ffffff;
+  --canvas: #f4f1e9;
+  --canvas-dark: color-mix(in srgb, var(--brand-fill) 16%, #0f1a15);
+  --scrollbar: #d7d0c2;
+  --scrollbar-hover: #c3bbaa;
+  --shadow-soft: 0 1px 2px rgb(28 36 31 / 0.03);
+  --skin-strength: 0.6;
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  --brand: #83c9a7;
+  --brand-fill: #2f7a5c;
+  --brand-press: #3c8f6d;
+  --on-brand: #f5fbf7;
+  --accent: #e0a45e;
+  --danger: #e07b7b;
+  --ink: #e9eee9;
+  --muted: #9baba1;
+  /* 暗色面由主题色轻轻染色，换色时卡片底色跟着走，而不是固定墨绿 */
+  --line: color-mix(in srgb, var(--brand-fill) 22%, #262b28);
+  --surface: color-mix(in srgb, var(--brand-fill) 13%, #121716);
+  --surface-2: color-mix(in srgb, var(--brand-fill) 16%, #141a18);
+  --raised: color-mix(in srgb, var(--brand-fill) 16%, #202522);
+  --canvas: color-mix(in srgb, var(--brand-fill) 6%, #0b0e0d);
+  --scrollbar: color-mix(in srgb, var(--brand-fill) 14%, #3a423e);
+  --scrollbar-hover: color-mix(in srgb, var(--brand-fill) 14%, #4a534e);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+
+/*
+ * 主题色：只覆盖品牌色 token，背景、文字和语义色（危险/警告）保持中性。
+ * 默认（松柏绿）就是上面的 :root 与暗色块，所以这里只列其余色板。
+ */
+html[data-accent='ocean'] {
+  --brand: #1c5b7d;
+  --brand-fill: #1c5b7d;
+  --brand-press: #11394f;
+  --on-brand: #ffffff;
+}
+
+html[data-accent='ocean'][data-theme='dark'] {
+  --brand: #8ec7e6;
+  --brand-fill: #2c6f94;
+  --brand-press: #245c7b;
+  --on-brand: #f2fafe;
+}
+
+html[data-accent='sakura'] {
+  --brand: #a8446b;
+  --brand-fill: #a8446b;
+  --brand-press: #752a48;
+  --on-brand: #ffffff;
+}
+
+html[data-accent='sakura'][data-theme='dark'] {
+  --brand: #f0a3c0;
+  --brand-fill: #a34c70;
+  --brand-press: #8a3d5d;
+  --on-brand: #fff6fa;
+}
+
+html[data-accent='violet'] {
+  --brand: #5e4c92;
+  --brand-fill: #5e4c92;
+  --brand-press: #3f3164;
+  --on-brand: #ffffff;
+}
+
+html[data-accent='violet'][data-theme='dark'] {
+  --brand: #c5b1ee;
+  --brand-fill: #63519a;
+  --brand-press: #524283;
+  --on-brand: #f8f4ff;
+}
+
+html[data-accent='amber'] {
+  --brand: #9c5c12;
+  --brand-fill: #9c5c12;
+  --brand-press: #673c08;
+  --on-brand: #ffffff;
+}
+
+html[data-accent='amber'][data-theme='dark'] {
+  --brand: #e8b06d;
+  --brand-fill: #9c611b;
+  --brand-press: #835114;
+  --on-brand: #fff8ee;
+}
+
+html[data-accent='slate'] {
+  --brand: #45525d;
+  --brand-fill: #45525d;
+  --brand-press: #2b353d;
+  --on-brand: #ffffff;
+}
+
+html[data-accent='slate'][data-theme='dark'] {
+  --brand: #b3c1cc;
+  --brand-fill: #53616c;
+  --brand-press: #444f59;
+  --on-brand: #f6fafc;
+}
+
+/* 自定义背景时卡片、侧栏变半透明，让壁纸透出来；强度由滑杆控制遮罩 */
+html[data-skin='on'][data-theme='light'] {
+  --surface: rgb(255 253 248 / 0.9);
+  --surface-2: rgb(250 245 234 / 0.86);
+}
+
+html[data-skin='on'][data-theme='dark'] {
+  --surface: color-mix(in srgb, var(--brand-fill) 12%, rgb(18 23 22 / 0.9));
+  --surface-2: color-mix(in srgb, var(--brand-fill) 15%, rgb(20 26 24 / 0.86));
 }
 
 @layer base {
@@ -31,6 +167,8 @@
 
   /* NConfigProvider 会在 #app 下多包一层无高度的 div，不撑满的话子树的 h-full 全部失效 */
   #app {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
   }
@@ -40,19 +178,40 @@
     min-height: 0;
   }
 
+  /* 悬浮球与快捷菜单是透明窗口：不要铺页面底色，只保留球和面板本身 */
+  html[data-window='float'],
+  html[data-window='float'] body {
+    background: transparent;
+  }
+
   body {
     margin: 0;
-    background: var(--color-canvas);
-    color: var(--color-ink);
+    background: var(--canvas);
+    color: var(--ink);
     font-family: var(--font-sans);
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
     user-select: none;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  html[data-skin='on'] body {
+    background: transparent;
   }
 
   input,
   textarea {
     user-select: text;
+  }
+
+  /* WebView2 默认虚线焦点框换成品牌色实线，鼠标点击不出现 */
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--brand) 55%, transparent);
+    outline-offset: 2px;
   }
 
   ::-webkit-scrollbar {
@@ -61,22 +220,23 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #cdd6d1;
+    background: var(--scrollbar);
     border: 3px solid transparent;
     background-clip: content-box;
     border-radius: 8px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #b6c2bc;
+    background: var(--scrollbar-hover);
     background-clip: content-box;
   }
 }
 
 @utility card-surface {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
 }
 
 @utility num-display {

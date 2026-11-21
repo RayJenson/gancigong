@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "赶词工",
+  "version": "0.1.0",
+  "identifier": "com.gancigong.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev:tauri",
+    "devUrl": "http://localhost:5273",
+    "beforeBuildCommand": "npm run build:tauri",
+    "frontendDist": "../out/tauri-renderer"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "赶词工 · 别让单词等你",
+        "width": 1200,
+        "height": 760,
+        "minWidth": 940,
+        "minHeight": 620,
+        "center": true,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "nsis",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ],
+    "resources": [
+      "../resources/dictionary/words.json",
+      "../resources/dictionary/meta.json",
+      "../resources/kiosk-lock.ps1",
+      "../resources/tray.png"
+    ]
+  }
+}

@@ -47,6 +47,17 @@ function sanitize(s: Settings): Settings {
   if (typeof s.lockAllDisplays !== 'boolean') s.lockAllDisplays = DEFAULT_SETTINGS.lockAllDisplays
   if (typeof s.autostart !== 'boolean') s.autostart = DEFAULT_SETTINGS.autostart
   if (s.activeListId !== null && !Number.isInteger(s.activeListId)) s.activeListId = null
+  if (s.themeMode !== 'light' && s.themeMode !== 'dark' && s.themeMode !== 'system') {
+    s.themeMode = DEFAULT_SETTINGS.themeMode
+  }
+  if (!['pine', 'ocean', 'sakura', 'violet', 'amber', 'slate'].includes(s.themeAccent)) {
+    s.themeAccent = DEFAULT_SETTINGS.themeAccent
+  }
+  if (typeof s.themeBackground !== 'string' || /[/\\]|\.\./.test(s.themeBackground)) {
+    s.themeBackground = ''
+  }
+  const scrim = Number(s.themeScrim)
+  s.themeScrim = Number.isFinite(scrim) ? Math.round(Math.min(100, Math.max(0, scrim))) : DEFAULT_SETTINGS.themeScrim
   return s
 }
 

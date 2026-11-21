@@ -344,7 +344,12 @@ export function dueCount(listId: number | null = null): number {
   return overdue + fresh
 }
 
-export function buildDashboard(extra: { nextFireAt: number | null; nextFireReason: DashboardState['nextFireReason']; schedulerActive: boolean }): DashboardState {
+export function buildDashboard(extra: {
+  nextFireAt: number | null
+  scheduleSetAt: number | null
+  nextFireReason: DashboardState['nextFireReason']
+  schedulerActive: boolean
+}): DashboardState {
   const s = getSettings()
   const counts = wordCounts()
   const q = quotaState()
@@ -352,10 +357,18 @@ export function buildDashboard(extra: { nextFireAt: number | null; nextFireReaso
     get<{ n: number }>("select count(*) n from rounds where status in ('done', 'aborted') and planned_at >= ?", startOfDay(Date.now()))?.n ?? 0
   return {
     nextFireAt: extra.nextFireAt,
+    scheduleSetAt: extra.scheduleSetAt,
     nextFireReason: extra.nextFireReason,
+    activeListId: null,
+    activeListName: '',
     dueToday: dueCount(),
+    dueTomorrow: 0,
+    dueAfterTomorrow: 0,
+    reviewDue: dueCount(),
     mastered: counts.mastered,
     fresh: counts.fresh,
+    dailyNewWords: s.dailyNewWords,
+    newToday: 0,
     needMeaning: counts.needMeaning,
     totalWords: counts.total,
     delayUsed: q.used,
@@ -369,6 +382,8 @@ export function buildDashboard(extra: { nextFireAt: number | null; nextFireReaso
     windows: s.windows as TimeWindow[],
     intervalMinutes: s.intervalMinutes,
     schedulerActive: extra.schedulerActive,
+    wrongToday: 0,
+    wrongTotal: 0,
   }
 }
 

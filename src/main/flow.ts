@@ -141,6 +141,7 @@ export function flowStatus() {
   const s = scheduleStatus()
   return {
     nextFireAt: s.nextFireAt,
+    scheduleSetAt: s.setAt,
     reason: s.reason,
     schedulerActive: s.active,
     sessionRoundId: currentSessionRound(),

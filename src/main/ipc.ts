@@ -24,6 +24,7 @@ import {
   wordsRatedToday,
 } from './rounds'
 import { setSettings, getSettings } from './settings'
+import { clearBackground, pickBackground, themeState } from './theme'
 import { recompute, syncWordAvailability } from './scheduler'
 import {
   createList,
@@ -80,6 +81,18 @@ export function registerIpc(getMainWindow: () => BrowserWindow | null): void {
     broadcast(Push.ScheduleChanged, flowStatus())
     broadcast(Push.DataChanged)
     return next
+  })
+
+  handle(Invoke.ThemeState, () => themeState())
+  handle(Invoke.ThemePickBackground, async () => {
+    const url = await pickBackground()
+    broadcast(Push.DataChanged)
+    return url
+  })
+  handle(Invoke.ThemeClearBackground, () => {
+    const ok = clearBackground()
+    broadcast(Push.DataChanged)
+    return ok
   })
 
   handle(Invoke.ListsList, () => listLists())
@@ -155,6 +168,7 @@ export function registerIpc(getMainWindow: () => BrowserWindow | null): void {
     const status = flowStatus()
     return buildDashboard({
       nextFireAt: status.nextFireAt,
+      scheduleSetAt: status.scheduleSetAt,
       nextFireReason: status.reason,
       schedulerActive: status.schedulerActive,
     })

@@ -1,20 +1,31 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NButton, NIcon, NSelect, NSwitch, useMessage } from 'naive-ui'
 import { VolumeHighOutline } from '@vicons/ionicons5'
 import { useAppStore } from '@renderer/stores/app'
-import type { ListInfo, WordRow } from '@shared/types'
+import type { ListInfo, PracticeScope, WordRow } from '@shared/types'
+import { playError, playKey } from '@renderer/lib/typing-sound'
 
 const SESSION_SIZE = 20
 const MAX_POOL = 500
 
 type Phase = 'ready' | 'typing' | 'done'
 
+const SCOPE_OPTIONS: { label: string; value: PracticeScope }[] = [
+  { label: '今日要复习', value: 'dueToday' },
+  { label: '今日学过', value: 'learnedToday' },
+  { label: '打错过', value: 'wrong' },
+  { label: '已经学过', value: 'learned' },
+  { label: '全部单词', value: 'all' },
+]
+
 const store = useAppStore()
 const router = useRouter()
+const route = useRoute()
 const message = useMessage()
 
+const scope = ref<PracticeScope>('all')
 const lists = ref<ListInfo[]>([])
 const listChoice = ref(0)
 const hideWord = ref(false)
@@ -39,6 +50,23 @@ const listOptions = computed(() => [
   { label: '全部词表', value: 0 },
   ...lists.value.map((l) => ({ label: `${l.name}（${l.wordCount}）`, value: l.id })),
 ])
+
+const scopeLabel = computed(() => SCOPE_OPTIONS.find((o) => o.value === scope.value)?.label ?? '全部单词')
+
+const emptyText = computed(() => {
+  switch (scope.value) {
+    case 'dueToday':
+      return '今天没有要复习的单词，先去学点新词吧'
+    case 'learnedToday':
+      return '今天还没有学过的单词'
+    case 'wrong':
+      return '还没有打错过的单词，保持住'
+    case 'learned':
+      return '还没有进入学习或复习的单词'
+    default:
+      return '词库里还没有带释义的单词'
+  }
+})
 
 const currentWord = computed<WordRow | null>(() => words.value[index.value] ?? null)
 
@@ -132,7 +160,7 @@ async function loadWords(): Promise<void> {
   loading.value = true
   try {
     const listId = listChoice.value || null
-    const result = await window.ganci.wordsList({ listId, limit: MAX_POOL })
+    const result = await window.ganci.wordsList({ listId, scope: scope.value, limit: MAX_POOL })
     words.value = shuffle(result.rows.filter((w) => w.term.trim() && w.meaning.trim())).slice(0, SESSION_SIZE)
     index.value = 0
     phase.value = 'ready'
@@ -147,6 +175,12 @@ async function loadWords(): Promise<void> {
 
 function changeList(value: number): void {
   listChoice.value = value
+  ;(document.activeElement as HTMLElement | null)?.blur()
+  void loadWords()
+}
+
+function changeScope(value: PracticeScope): void {
+  scope.value = value
   ;(document.activeElement as HTMLElement | null)?.blur()
   void loadWords()
 }
@@ -251,6 +285,7 @@ function onKey(event: KeyboardEvent): void {
   totalKeys.value += 1
   if (event.key.toLowerCase() !== expected.toLowerCase()) {
     wrong.value = { pos: typed.value.length, ch: event.key.toUpperCase() }
+    playError()
     if (wrongTimer) clearTimeout(wrongTimer)
     wrongTimer = window.setTimeout(() => {
       wrong.value = null
@@ -259,6 +294,7 @@ function onKey(event: KeyboardEvent): void {
   }
   correctKeys.value += 1
   typed.value.push(expected)
+  playKey()
   if (typed.value.length === letterCount.value) finishWord()
 }
 
@@ -267,6 +303,10 @@ onMounted(async () => {
   ticker = window.setInterval(() => {
     if (startedAt !== null && phase.value === 'typing') elapsedMs.value = Date.now() - startedAt
   }, 200)
+  const queryScope = route.query.scope
+  if (typeof queryScope === 'string' && SCOPE_OPTIONS.some((o) => o.value === queryScope)) {
+    scope.value = queryScope as PracticeScope
+  }
   await loadLists()
   await loadWords()
 })
@@ -285,15 +325,23 @@ onBeforeUnmount(() => {
         class="cursor-pointer border-0 bg-transparent text-[13px] text-muted hover:text-ink"
         @click="router.push('/')"
       >
-        ← 复习台
+        ← 主页
       </button>
       <h1 class="text-[20px] font-semibold">练习</h1>
-      <span class="text-[12px] text-muted">打字练习，不计入复习进度</span>
+      <span class="text-[12px] text-muted">打字练习 · {{ scopeLabel }} · 不计入复习进度</span>
 
       <div class="ml-auto flex items-center gap-4">
         <n-select
           size="small"
-          class="w-[190px]"
+          style="width: 128px"
+          :value="scope"
+          :options="SCOPE_OPTIONS"
+          :consistent-menu-width="false"
+          @update:value="changeScope"
+        />
+        <n-select
+          size="small"
+          style="width: 190px"
           :value="listChoice"
           :options="listOptions"
           :consistent-menu-width="false"
@@ -320,8 +368,9 @@ onBeforeUnmount(() => {
       <div v-if="loading" class="flex flex-1 items-center justify-center text-[13px] text-muted">加载中…</div>
 
       <div v-else-if="!words.length" class="flex flex-1 flex-col items-center justify-center gap-3">
-        <div class="text-[14px]">词库里还没有带释义的单词</div>
-        <n-button type="primary" @click="router.push('/words')">去词库导入</n-button>
+        <div class="text-[14px]">{{ emptyText }}</div>
+        <n-button v-if="scope === 'all'" type="primary" @click="router.push('/words')">去词库导入</n-button>
+        <n-button v-else @click="router.push('/')">返回主页</n-button>
       </div>
 
       <div v-else-if="phase === 'done'" class="flex flex-1 flex-col items-center justify-center">
@@ -343,7 +392,7 @@ onBeforeUnmount(() => {
         </div>
         <div class="mt-8 flex gap-3">
           <n-button type="primary" size="large" @click="startAnother">再练一轮</n-button>
-          <n-button size="large" @click="router.push('/')">返回复习台</n-button>
+          <n-button size="large" @click="router.push('/')">返回主页</n-button>
         </div>
       </div>
 

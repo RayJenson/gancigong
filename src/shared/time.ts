@@ -84,6 +84,19 @@ export function formatCountdown(target: number | null, now: number): string {
   return `${Math.floor(hours / 24)} 天后`
 }
 
+/** 复习间隔的友好表达：5 分钟 / 12 小时 / 7 天 */
+export function formatInterval(minutes: number | null | undefined): string {
+  const m = Math.max(0, Math.round(minutes ?? 0))
+  if (m === 0) return '—'
+  if (m < 60) return `${m} 分钟`
+  if (m < 1_440) {
+    const hours = m / 60
+    return Number.isInteger(hours) ? `${hours} 小时` : `${hours.toFixed(1)} 小时`
+  }
+  const days = m / 1_440
+  return Number.isInteger(days) ? `${days} 天` : `${days.toFixed(1)} 天`
+}
+
 /** 到期时间的友好表达：今天 HH:mm / 明天 HH:mm / N 天前 · YYYY-MM-DD */
 export function formatDue(dueAt: number | null | undefined, now: number): string {
   if (!dueAt) return '新词'

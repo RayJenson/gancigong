@@ -2,7 +2,7 @@
 import { computed, h, onBeforeUnmount, onMounted, ref } from 'vue'
 import { NDataTable, type DataTableColumns } from 'naive-ui'
 import type { StatsOverview } from '@shared/types'
-import { formatCountdown } from '@shared/time'
+import { formatCountdown, formatInterval } from '@shared/time'
 
 const stats = ref<StatsOverview | null>(null)
 const loading = ref(false)
@@ -83,9 +83,14 @@ const columns = computed<DataTableColumns<LapseRow>>(() => [
   { title: '复习', key: 'reps', width: 66, render: (r) => h('span', { class: 'num-display text-ink/80' }, String(r.reps)) },
   {
     title: '间隔',
-    key: 'intervalDays',
-    width: 66,
-    render: (r) => h('span', { class: 'num-display text-ink/80' }, r.intervalDays ? `${r.intervalDays}天` : '—'),
+    key: 'intervalMinutes',
+    width: 76,
+    render: (r) =>
+      h(
+        'span',
+        { class: 'num-display text-ink/80' },
+        formatInterval(r.intervalMinutes ?? (r.intervalDays ? r.intervalDays * 1_440 : 0))
+      ),
   },
 ])
 </script>
@@ -112,13 +117,24 @@ const columns = computed<DataTableColumns<LapseRow>>(() => [
           <span><i class="mr-1 inline-block h-2 w-2 rounded-sm bg-danger/70 align-middle"></i>不认识</span>
         </div>
       </div>
-      <div class="mt-4 flex h-[150px] items-end gap-1.5">
-        <div v-for="b in bars" :key="b.day" class="group relative flex-1" :title="`${b.day} · ${b.words} 词 · 认识率 ${b.rate}`">
-          <div class="flex flex-col justify-end overflow-hidden rounded-t-sm" :style="{ height: `${b.totalHeight}%` }">
-            <div class="w-full bg-danger/70" :style="{ height: `${100 - b.knownHeight}%` }"></div>
-            <div class="w-full bg-brand" :style="{ height: `${b.knownHeight}%` }"></div>
+      <div class="mt-4 flex h-[170px] items-end gap-1.5">
+        <div
+          v-for="b in bars"
+          :key="b.day"
+          class="group flex h-full flex-1 flex-col justify-end"
+          :title="`${b.day} · ${b.words} 词 · 认识率 ${b.rate}`"
+        >
+          <div
+            class="flex w-full flex-col justify-end overflow-hidden rounded-t-sm"
+            :style="{ height: `${b.totalHeight}%`, minHeight: b.words ? '6px' : '2px' }"
+          >
+            <template v-if="b.words">
+              <div class="w-full bg-danger/70" :style="{ height: `${100 - b.knownHeight}%` }"></div>
+              <div class="w-full bg-brand" :style="{ height: `${b.knownHeight}%` }"></div>
+            </template>
+            <div v-else class="h-full w-full bg-line"></div>
           </div>
-          <div class="mt-1 text-center text-[10px] text-muted">{{ b.day }}</div>
+          <div class="mt-1 shrink-0 text-center text-[10px] text-muted">{{ b.day }}</div>
         </div>
       </div>
       <div v-if="!bars.length" class="py-8 text-center text-[13px] text-muted">还没有复习记录，先完成第一轮。</div>
