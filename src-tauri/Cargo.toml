@@ -1,6 +1,6 @@
 [package]
 name = "gancigong"
-version = "0.1.0"
+version = "0.2.0"
 description = "赶词工 —— 主动触发型单词复习工具"
 edition = "2021"
 
