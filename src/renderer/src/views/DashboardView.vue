@@ -7,6 +7,7 @@ import {
   AlertCircleOutline,
   AnalyticsOutline,
   ArrowForwardOutline,
+  BarbellOutline,
   CheckmarkCircleOutline,
   CreateOutline,
   LayersOutline,
@@ -40,7 +41,7 @@ interface PracticeScopeMeta {
 
 const PRACTICE_SCOPES: PracticeScopeMeta[] = [
   { id: 'dueToday', name: '今日要复习', desc: '今天到期和已经到期的单词', icon: TimeOutline },
-  { id: 'learnedToday', name: '今日学过', desc: '今天背过或复习过的单词', icon: CheckmarkCircleOutline },
+  { id: 'learnedToday', name: '今日新学的单词', desc: '今天第一次学习的单词', icon: CheckmarkCircleOutline },
   { id: 'wrong', name: '打错过', desc: '累计答错过的单词，错得多的排前面', icon: AlertCircleOutline },
   { id: 'learned', name: '已经学过', desc: '进入过学习或复习的单词', icon: LibraryOutline },
   { id: 'all', name: '全部单词', desc: '词库里所有带释义的单词', icon: LayersOutline },
@@ -400,6 +401,11 @@ function goPrimary(): void {
           <n-icon :component="CreateOutline" :size="15" />
           <span class="tool-name">打字练习</span>
           <span class="tool-meta">不计进度</span>
+        </button>
+        <button class="tool-row" @click="router.push('/reinforce')">
+          <n-icon :component="BarbellOutline" :size="15" />
+          <span class="tool-name">练习巩固</span>
+          <span class="tool-meta">5 种练法</span>
         </button>
         <button class="tool-row" @click="router.push('/stats')">
           <n-icon :component="AnalyticsOutline" :size="15" />

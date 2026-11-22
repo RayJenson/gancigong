@@ -250,6 +250,9 @@ const api: GanciApi = {
           (query.scope === 'wrong' && (w.lapses ?? 0) > 0) ||
           (query.scope === 'learned' && (w.reps ?? 0) > 0) ||
           (query.scope === 'learnedToday' && (w.reps ?? 0) > 0) ||
+          (query.scope === 'studiedToday' && (w.reps ?? 0) > 0) ||
+          (query.scope === 'wrongReview' && (w.lapses ?? 0) > 0) ||
+          (query.scope === 'reviewing' && (w.reps ?? 0) > 0 && (w.intervalMinutes ?? 0) < 10080) ||
           (query.scope === 'dueToday' && w.dueAt != null && w.dueAt <= endToday))
     )
     const offset = query.offset ?? 0

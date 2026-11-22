@@ -6,6 +6,7 @@ const routes = [
   { path: '/settings', name: 'settings', component: () => import('@renderer/views/SettingsView.vue'), meta: { title: '设置', nav: 'settings' } },
   { path: '/stats', name: 'stats', component: () => import('@renderer/views/StatsView.vue'), meta: { title: '统计', nav: 'stats' } },
   { path: '/practice', name: 'practice', component: () => import('@renderer/views/PracticeView.vue'), meta: { title: '练习', nav: 'dashboard' } },
+  { path: '/reinforce', name: 'reinforce', component: () => import('@renderer/views/ReinforceView.vue'), meta: { title: '练习巩固', nav: 'reinforce' } },
   { path: '/learn', name: 'learn', component: () => import('@renderer/views/LearnView.vue'), meta: { title: '背单词', immersive: true } },
   { path: '/wrongs', name: 'wrongs', component: () => import('@renderer/views/WrongsView.vue'), meta: { title: '错词本', nav: 'wrongs' } },
   // 复习弹窗、副屏遮罩与桌面悬浮球都是独立窗口，不带应用外壳
@@ -22,4 +23,4 @@ export default createRouter({
   routes,
 })
 
-export type NavKey = 'dashboard' | 'words' | 'wrongs' | 'settings' | 'stats'
+export type NavKey = 'dashboard' | 'words' | 'reinforce' | 'wrongs' | 'settings' | 'stats'

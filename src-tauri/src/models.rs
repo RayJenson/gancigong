@@ -261,7 +261,8 @@ pub struct WordQuery {
     pub unit_id: Option<i64>,
     pub query: Option<String>,
     pub need_meaning_only: Option<bool>,
-    /// 打字练习取词范围：all / dueToday / learnedToday / learned / wrong
+    /// 取词范围：all / dueToday / learnedToday / learned / wrong /
+    /// studiedToday（今日已学）/ wrongReview（错词本）/ reviewing（复习中）
     pub scope: Option<String>,
     pub sort: Option<String>,
     pub limit: Option<i64>,

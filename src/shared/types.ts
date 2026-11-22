@@ -6,8 +6,10 @@ export type LockLevel = 'app' | 'kiosk'
 export type ThemeMode = 'light' | 'dark' | 'system'
 /** 主题色色板：松柏绿 / 海岛蓝 / 樱花粉 / 暮山紫 / 琥珀橙 / 烟墨灰 */
 export type ThemeAccent = 'pine' | 'ocean' | 'sakura' | 'violet' | 'amber' | 'slate'
-/** 打字练习取词范围：全部 / 今日要复习 / 今日学过 / 已经学过 / 打错过 */
+/** 打字练习取词范围：全部 / 今日要复习 / 今日新学 / 已经学过 / 打错过 */
 export type PracticeScope = 'all' | 'dueToday' | 'learnedToday' | 'learned' | 'wrong'
+/** 练习巩固取词范围：今日已学回顾 / 错词回顾 / 复习中单词 */
+export type ReinforceScope = 'studiedToday' | 'wrongReview' | 'reviewing'
 /** 0 = 不认识，1 = 认识 */
 export type Rating = 0 | 1
 export type RoundStatus = 'open' | 'done' | 'aborted' | 'skipped' | 'empty'
@@ -238,8 +240,8 @@ export interface WordQuery {
   unitId?: number | null
   query?: string
   needMeaningOnly?: boolean
-  /** 打字练习取词范围，不传 = 全部单词 */
-  scope?: PracticeScope | null
+  /** 取词范围，不传 = 全部单词 */
+  scope?: PracticeScope | ReinforceScope | null
   sort?: 'due' | 'term' | 'lapses' | 'created'
   limit?: number
   offset?: number

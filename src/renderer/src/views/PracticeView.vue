@@ -14,7 +14,7 @@ type Phase = 'ready' | 'typing' | 'done'
 
 const SCOPE_OPTIONS: { label: string; value: PracticeScope }[] = [
   { label: '今日要复习', value: 'dueToday' },
-  { label: '今日学过', value: 'learnedToday' },
+  { label: '今日新学的单词', value: 'learnedToday' },
   { label: '打错过', value: 'wrong' },
   { label: '已经学过', value: 'learned' },
   { label: '全部单词', value: 'all' },
@@ -58,7 +58,7 @@ const emptyText = computed(() => {
     case 'dueToday':
       return '今天没有要复习的单词，先去学点新词吧'
     case 'learnedToday':
-      return '今天还没有学过的单词'
+      return '今天还没有新学的单词'
     case 'wrong':
       return '还没有打错过的单词，保持住'
     case 'learned':

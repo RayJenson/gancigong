@@ -316,16 +316,30 @@ pub fn list_words(conn: &Connection, q: &WordQuery) -> Result<(Vec<WordRow>, i64
     match q.scope.as_deref() {
         Some("wrong") => where_parts.push("coalesce(s.lapses, 0) > 0".into()),
         Some("learnedToday") => {
-            where_parts.push(
-                "(coalesce(s.learned_at, 0) >= ? or coalesce(s.last_reviewed_at, 0) >= ?)".into(),
-            );
-            args.push(start_today.into());
+            // 只看首次学习时间：复习旧词不算「今日新学」
+            where_parts.push("coalesce(s.learned_at, 0) >= ?".into());
             args.push(start_today.into());
         }
         Some("learned") => where_parts.push("coalesce(s.reps, 0) > 0".into()),
         Some("dueToday") => {
             where_parts.push("s.due_at is not null and s.due_at <= ?".into());
             args.push((start_today + DAY_MS - 1).into());
+        }
+        Some("studiedToday") => {
+            // 今天学过或复习过的词：两个动作都会刷新 last_reviewed_at
+            where_parts.push("coalesce(s.last_reviewed_at, 0) >= ?".into());
+            args.push(start_today.into());
+        }
+        Some("wrongReview") => {
+            where_parts.push(
+                "exists(select 1 from wrong_book b where b.word_id = w.id)".into(),
+            );
+        }
+        Some("reviewing") => {
+            where_parts.push(
+                "coalesce(s.reps, 0) > 0 and coalesce(s.interval_minutes, 0) < ?".into(),
+            );
+            args.push(MASTERED_FROM_MINUTES.into());
         }
         _ => {}
     }
@@ -342,10 +356,18 @@ pub fn list_words(conn: &Connection, q: &WordQuery) -> Result<(Vec<WordRow>, i64
             Some("wrong") => {
                 "coalesce(s.lapses, 0) desc, coalesce(s.last_reviewed_at, 0) desc, w.id asc".to_string()
             }
-            Some("learnedToday") | Some("learned") => {
+            Some("learnedToday") => "coalesce(s.learned_at, 0) desc, w.id asc".to_string(),
+            Some("learned") => {
                 "coalesce(s.last_reviewed_at, 0) desc, w.id asc".to_string()
             }
-            Some("dueToday") => "coalesce(s.due_at, 0) asc, w.id asc".to_string(),
+            Some("dueToday") | Some("reviewing") => {
+                "coalesce(s.due_at, 0) asc, w.id asc".to_string()
+            }
+            Some("studiedToday") => "coalesce(s.last_reviewed_at, 0) desc, w.id asc".to_string(),
+            Some("wrongReview") => {
+                "(select b.last_wrong_at from wrong_book b where b.word_id = w.id) desc, w.id asc"
+                    .to_string()
+            }
             _ => "case when s.due_at is null then 0 else 1 end, coalesce(s.due_at, 0) asc, w.id asc"
                 .to_string(),
         },
@@ -584,5 +606,137 @@ pub fn word_counts(conn: &Connection, list_id: Option<i64>) -> WordCounts {
         fresh,
         need_meaning,
         due_now,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::db;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn learned_today_scope_only_returns_first_learned_today() {
+        let dir = std::env::temp_dir().join(format!(
+            "gancigong-words-test-{}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let (rows, total) = {
+            let conn = db::init(&dir).unwrap();
+            conn.execute(
+                "insert into lists (name, created_at) values ('t', 0)",
+                [],
+            )
+            .unwrap();
+            let list_id = conn.last_insert_rowid();
+            let today = start_of_day(now()) + 1_000;
+            let insert_word = |term: &str| {
+                conn.execute(
+                    "insert into words (list_id, term, created_at) values (?1, ?2, ?3)",
+                    params![list_id, term, now()],
+                )
+                .unwrap();
+                conn.last_insert_rowid()
+            };
+            let new_today = insert_word("new_today");
+            let old_reviewed = insert_word("old_reviewed");
+            insert_word("untouched");
+            conn.execute(
+                "insert into word_states (word_id, learned_at, last_reviewed_at, reps)
+                 values (?1, ?2, ?2, 1)",
+                params![new_today, today],
+            )
+            .unwrap();
+            conn.execute(
+                "insert into word_states (word_id, learned_at, last_reviewed_at, reps)
+                 values (?1, ?2, ?3, 2)",
+                params![old_reviewed, today - DAY_MS, today],
+            )
+            .unwrap();
+            let q = WordQuery {
+                scope: Some("learnedToday".into()),
+                ..WordQuery::default()
+            };
+            list_words(&conn, &q).unwrap()
+        };
+        let _ = std::fs::remove_dir_all(&dir);
+        assert_eq!(total, 1);
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].term, "new_today");
+    }
+
+    #[test]
+    fn reinforce_scopes_filter_as_expected() {
+        let dir = std::env::temp_dir().join(format!(
+            "gancigong-reinforce-test-{}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let (studied, wrong, reviewing) = {
+            let conn = db::init(&dir).unwrap();
+            conn.execute(
+                "insert into lists (name, created_at) values ('t', 0)",
+                [],
+            )
+            .unwrap();
+            let list_id = conn.last_insert_rowid();
+            let today = start_of_day(now()) + 5_000;
+            let insert_word = |term: &str| {
+                conn.execute(
+                    "insert into words (list_id, term, created_at) values (?1, ?2, ?3)",
+                    params![list_id, term, now()],
+                )
+                .unwrap();
+                conn.last_insert_rowid()
+            };
+            let today_word = insert_word("today_word");
+            let old_word = insert_word("old_word");
+            let mastered = insert_word("mastered_word");
+            let wrong_word = insert_word("wrong_word");
+            let insert_state = |word_id: i64, interval: i64, reps: i64, reviewed_at: i64| {
+                conn.execute(
+                    "insert into word_states
+                       (word_id, interval_minutes, due_at, reps, last_reviewed_at, learned_at)
+                     values (?1, ?2, ?3, ?4, ?5, ?5)",
+                    params![word_id, interval, reviewed_at + 3_600_000, reps, reviewed_at],
+                )
+                .unwrap();
+            };
+            insert_state(today_word, 30, 2, today);
+            insert_state(old_word, 30, 2, today - DAY_MS);
+            insert_state(mastered, MASTERED_FROM_MINUTES, 5, 0);
+            insert_state(wrong_word, 5, 1, today);
+            conn.execute(
+                "insert into wrong_book (word_id, first_wrong_at, last_wrong_at)
+                 values (?1, ?2, ?2)",
+                params![wrong_word, today],
+            )
+            .unwrap();
+
+            let query = |scope: &str| WordQuery {
+                scope: Some(scope.into()),
+                ..WordQuery::default()
+            };
+            let terms = |scope: &str| {
+                let mut out: Vec<String> = list_words(&conn, &query(scope))
+                    .unwrap()
+                    .0
+                    .into_iter()
+                    .map(|w| w.term)
+                    .collect();
+                out.sort();
+                out
+            };
+            (terms("studiedToday"), terms("wrongReview"), terms("reviewing"))
+        };
+        let _ = std::fs::remove_dir_all(&dir);
+        assert_eq!(studied, vec!["today_word", "wrong_word"]);
+        assert_eq!(wrong, vec!["wrong_word"]);
+        assert_eq!(reviewing, vec!["old_word", "today_word", "wrong_word"]);
     }
 }

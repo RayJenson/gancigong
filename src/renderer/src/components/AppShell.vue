@@ -5,6 +5,7 @@ import { NIcon, NTooltip } from 'naive-ui'
 import {
   AnalyticsOutline,
   AlertCircleOutline,
+  BarbellOutline,
   ChevronBackOutline,
   ChevronForwardOutline,
   GridOutline,
@@ -34,6 +35,7 @@ function toggleRail(): void {
 const NAV = [
   { key: 'dashboard', label: '主页', icon: GridOutline, to: '/' },
   { key: 'words', label: '词库', icon: LibraryOutline, to: '/words' },
+  { key: 'reinforce', label: '练习巩固', icon: BarbellOutline, to: '/reinforce' },
   { key: 'wrongs', label: '错词本', icon: AlertCircleOutline, to: '/wrongs' },
   { key: 'stats', label: '统计', icon: AnalyticsOutline, to: '/stats' },
   { key: 'settings', label: '设置', icon: SettingsOutline, to: '/settings' },

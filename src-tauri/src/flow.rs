@@ -212,7 +212,7 @@ pub fn finalize(app: &AppHandle, round_id: i64, abort: bool, delay: bool, reason
     if delay {
         scheduler::apply_delay(&state);
     } else {
-        scheduler::recompute(&state);
+        scheduler::recompute_after_round(&state);
     }
     notify_data_changed(app);
 }
